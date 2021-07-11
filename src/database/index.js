@@ -1,10 +1,14 @@
-const mysql = require('mysql');
+async function connect() {
+    const mysql = require("mysql2/promise");
 
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '123456',
-    port: 3306
-});
+    const connection = await mysql.createConnection(
+        `mysql://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
+    );
 
-connection.connect(console.log("Database is running!"));
+    console.log("Database connected!");
+
+    return connection;
+}
+
+module.exports = connect();
+
