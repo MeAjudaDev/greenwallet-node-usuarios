@@ -6,6 +6,8 @@ const routes = require('./routes');
 
 db();
 
+users = [];
+
 const app = express();
 
 app.use(cors());

@@ -1,5 +1,3 @@
-const users = [];
-
 exports.create = async ({ name, email, password }) => {
     const user = {
         name,
