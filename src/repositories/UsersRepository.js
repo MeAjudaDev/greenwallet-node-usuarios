@@ -1,4 +1,4 @@
-const connect = require('../database')
+const connect = require('../database');
 
 exports.create = async ({ name, email, password, activation_code }) => {
     const conn = await connect();
