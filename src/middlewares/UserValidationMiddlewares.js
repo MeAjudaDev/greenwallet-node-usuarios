@@ -1,37 +1,14 @@
+const { verifyParams } = require("../validators/ValidateParams");
+
 exports.VerifyCreateUser = async (req, res, next) => {
-    const { name, email, password } = req.body;
 
-    let errors = []
+    const requiredParams = ["name", "email", "password"];
 
-    if(name === "" || name.length > 100)  {
-      error = {
-        msg: "Invalid value",
-        param: "name"
-      }
-      errors.push(error);
-    }
+    const errors = verifyParams(req.body, requiredParams);
 
-    if(email === ""|| name.length > 100)  {
-      error = {
-        msg: "Invalid value",
-        param: "email"
-      }
-      errors.push(error);
-    }
+    if(!errors.length) {
+      return next();
+    } 
 
-    if(password === ""|| name.length > 10)  {  //Confirmar tamanho da senha: André definiu como tamanho 100 caracteres.
-      error = {
-        msg: "Invalid value",
-        param: "password"
-      }
-      errors.push(error);
-    }
-
-    if(errors.length == 0) {
-      next();
-    } else {
-      return res.status(400).json(errors);
-    }
-
-    
+    return res.status(422).json(errors);
 }
