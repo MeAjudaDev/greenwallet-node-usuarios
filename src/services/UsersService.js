@@ -1,7 +1,13 @@
 const usersRepository = require('../repositories/UsersRepository');
+const { encryptString } = require('./encryptionService');
 
-exports.createUser = async (name, email, password, activation_code) => {
+exports.createUser = async (name, email, password) => {
 
-    
-    await usersRepository.create({ name, email, password, activation_code });
+    const encryptedPassword = await encryptString(password);
+
+    await usersRepository.create({ 
+        name, 
+        email, 
+        password: encryptedPassword
+    });
 }
