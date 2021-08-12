@@ -5,5 +5,5 @@ exports.createUser = async (req, res) => {
 
     const user = await createUsersService.createUser( name, email, password );
 
-    return res.status(200).json(user);
+    return res.status(200).send();
 }
