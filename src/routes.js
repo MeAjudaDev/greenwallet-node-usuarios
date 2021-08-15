@@ -7,4 +7,6 @@ const userValidationMiddlewares = require('./middlewares/UserValidationMiddlewar
 routes.post('/users', userValidationMiddlewares.VerifyCreateUser, usersController.createUser);
 routes.post('/users/activation', usersController.activationAccount);
 
+routes.post('/sessions', usersController.userAuthentication);
+
 module.exports = routes;

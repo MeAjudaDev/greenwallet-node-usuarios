@@ -1,12 +1,12 @@
 const usersRepository = require('../repositories/UsersRepository');
 const tokenOptions = require('../utils/TokenOptions');
-const { encryptString } = require('./encryptionService');
+const encryptionService = require('./encryptionService');
 const { mailProvider } = require('../provider/sendMail/SendMailProvider');
 const { generateCodeFromLenght } = require('../utils/GenerateRandomCode');
 
 exports.createUser = async (name, email, password) => {
   try {
-    const encryptedPassword = await encryptString(password);
+    const encryptedPassword = await encryptionService.encryptString(password);
     const activation_code = generateCodeFromLenght(4);
 
     const userAlreadyExists = await usersRepository.findUserByEmail(email);
@@ -51,4 +51,31 @@ exports.activationAccount = async (token, code) => {
     throw new Error(`This code (${code}) is invalid!`);
   }
 
+}
+
+exports.userAuthentication = async (email, password) => {
+  try {
+    const user = await usersRepository.findUserByEmail(email);
+
+    const passwordMatch = await encryptionService.compareString(password, user[0][0].password);
+
+    if (!passwordMatch) {
+      throw new Error("Email or password incorrect!");
+    }
+
+    const token = tokenOptions.generateToken({}, '1h');
+
+    const tokenReturn = {
+      token,
+      user: {
+        name: user[0][0].name,
+        email: user[0][0].email
+      }
+    }
+
+    return tokenReturn;
+
+  } catch (error) {
+    throw new Error("Email or password incorrect!");
+  }
 }
