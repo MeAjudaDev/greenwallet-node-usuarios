@@ -10,7 +10,7 @@ exports.mailProvider = async (email, subject, message) => {
         secure: false,
         auth: {
             user: process.env.MAILER_USER,
-            pass: process.env.MAILER_PASS.
+            pass: process.env.MAILER_PASS
         }
     });
 
