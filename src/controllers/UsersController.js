@@ -9,7 +9,7 @@ exports.createUser = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    return res.status(400).json(err.message);
+    return res.status(400).json({ message: err.message });
   }
 }
 
@@ -24,7 +24,7 @@ exports.activationAccount = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    return res.status(400).json(err.message);
+    return res.status(400).json({ message: err.message });
   }
 }
 
@@ -38,6 +38,6 @@ exports.userAuthentication = async (req, res) => {
 
   } catch (err) {
     console.log(err);
-    return res.status(400).json(err.message);
+    return res.status(400).json({ message: err.message });
   }
 }

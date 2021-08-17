@@ -1,7 +1,7 @@
 const usersRepository = require('../repositories/UsersRepository');
 const tokenOptions = require('../utils/TokenOptions');
 const encryptionService = require('./encryptionService');
-const { mailProvider } = require('../provider/sendMail/SendMailProvider');
+const sendMailService = require('./sendMailService');
 const { generateCodeFromLenght } = require('../utils/GenerateRandomCode');
 
 exports.createUser = async (name, email, password) => {
@@ -9,10 +9,11 @@ exports.createUser = async (name, email, password) => {
     const encryptedPassword = await encryptionService.encryptString(password);
     const activation_code = generateCodeFromLenght(4);
 
-    const userAlreadyExists = await usersRepository.findUserByEmail(email);
+    const [userAlreadyExists] = await usersRepository.findUserByEmail(email);
 
-    if (userAlreadyExists[0].length > 0) {
+    if (userAlreadyExists.length > 0) {
       throw new Error("E-mail is already in use!");
+      return null;
     }
 
     await usersRepository.create({
@@ -22,11 +23,10 @@ exports.createUser = async (name, email, password) => {
       activation_code
     });
 
-    const token = tokenOptions.generateToken({ email }, '5h');
-    const link = `${process.env.USER_ACTIVATION_URL}${token}`;
+    await sendMailService.activationAccountMail(name, email, activation_code);
 
-    await mailProvider(email, "Ativação de Conta", `<h1>Olá ${name}!</h1> <h3>Seu código de ativação é: <br><br> ${activation_code}</h3> <p>Link para realizar a ativação:</p> <br> <a><strong>${link}</strong></a>`);
   } catch (err) {
+    console.error(err);
     throw new Error(`This e-mail (${email}) is already in use!`);
   }
 }
@@ -39,9 +39,9 @@ exports.activationAccount = async (token, code) => {
 
     const email = tokenInfo.email;
 
-    const user = await usersRepository.findUserByEmail(email);
+    const [[user]] = await usersRepository.findUserByEmail(email);
 
-    if (code === user[0][0].activation_code) {
+    if (code === user.activation_code) {
       return await usersRepository.updateStateColumn(email, 'A');
     } else {
       throw new Error("Invalid code!")
@@ -55,9 +55,9 @@ exports.activationAccount = async (token, code) => {
 
 exports.userAuthentication = async (email, password) => {
   try {
-    const user = await usersRepository.findUserByEmail(email);
+    const [[user]] = await usersRepository.findUserByEmail(email);
 
-    const passwordMatch = await encryptionService.compareString(password, user[0][0].password);
+    const passwordMatch = await encryptionService.compareString(password, user.password);
 
     if (!passwordMatch) {
       throw new Error("Email or password incorrect!");
@@ -68,9 +68,14 @@ exports.userAuthentication = async (email, password) => {
     const tokenReturn = {
       token,
       user: {
-        name: user[0][0].name,
-        email: user[0][0].email
+        name: user.name,
+        email: user.email
       }
+    }
+
+    if (user.state != 'A') {
+      const tokenReturnMessage = { ...tokenReturn, message: 'Ative sua conta!' }
+      return tokenReturnMessage;
     }
 
     return tokenReturn;
