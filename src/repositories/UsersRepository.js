@@ -1,16 +1,33 @@
 const connect = require('../database');
 
-const { generateCodeFromLenght } = require('../utils/GenerateRandomCode');
-
 exports.create = async ({ name, email, password, activation_code }) => {
-    const conn = await connect();
-    const sql = 'INSERT INTO users(name, email, password, activation_code) VALUES (?, ?, ?, ?)';
-    const values = [
-        name, 
-        email, 
-        password, 
-        activation_code = generateCodeFromLenght(4)
-    ];
+  const conn = await connect();
+  const sql = 'INSERT INTO users(name, email, password, activation_code) VALUES (?, ?, ?, ?)';
+  const values = [
+    name,
+    email,
+    password,
+    activation_code
+  ];
 
-    return await conn.query(sql, values);
+  return await conn.query(sql, values);
+}
+
+exports.findUserByEmail = async (email) => {
+  const conn = await connect();
+  const sql = 'SELECT name, email, activation_code, state FROM users WHERE email = ?';
+  const values = [email];
+
+  return await conn.query(sql, values);
+}
+
+exports.updateStateColumn = async (email, state) => {
+  const conn = await connect();
+  const sql = "UPDATE users SET state = ? WHERE email= ?";
+  const values = [
+    state,
+    email
+  ];
+
+  return await conn.query(sql, values);
 }

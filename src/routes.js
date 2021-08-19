@@ -1,9 +1,10 @@
 const express = require('express');
 const routes = express.Router();
 
-const createUsersController = require('./controllers/UsersController');
-const userValidationMiddlewares = require('./middlewares/UserValidationMiddlewares')
+const usersController = require('./controllers/UsersController');
+const userValidationMiddlewares = require('./middlewares/UserValidationMiddlewares');
 
-routes.post('/users', userValidationMiddlewares.VerifyCreateUser, createUsersController.createUser);
+routes.post('/users', userValidationMiddlewares.VerifyCreateUser, usersController.createUser);
+routes.post('/users/activation', usersController.activationAccount);
 
 module.exports = routes;
