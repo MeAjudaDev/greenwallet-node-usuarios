@@ -10,5 +10,6 @@ routes.post(
   usersController.createUser
 );
 routes.post("/users/activation", usersController.activationAccount);
+routes.post("/users/login", usersController.login);
 routes.post("/users/recoverPassword");
 module.exports = routes;

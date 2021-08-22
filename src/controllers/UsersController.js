@@ -25,6 +25,24 @@ exports.activationAccount = async (req, res) => {
     return res.status(400).json(err.message);
   }
 };
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const login = await createUsersService.login(email, password);
+
+    if (!login.logged) {
+      return res.status(403).json({ message: login.msg });
+    }
+
+    return res.status(200).json({ user: login.user, jwt: login.jwt });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err.message);
+  }
+}
+
 exports.sendUserCode = async (req, res) => {
   try {
     const { email } = req.body;

@@ -1,6 +1,6 @@
 const usersRepository = require("../repositories/UsersRepository");
 const tokenOptions = require("../utils/TokenOptions");
-const { encryptString } = require("./encryptionService");
+const { encryptString, compare } = require("./encryptionService");
 const { mailProvider } = require("../provider/sendMail/SendMailProvider");
 const { generateCodeFromLenght } = require("../utils/GenerateRandomCode");
 
@@ -54,3 +54,49 @@ exports.activationAccount = async (token, code) => {
     throw new Error(`This code (${code}) is invalid!`);
   }
 };
+
+exports.login = async (email, password) => {
+  try {
+    const login = await usersRepository.findUserForLogin(email);
+    const user = login[0][0];
+
+    if (!user) {
+      return {
+        logged: false,
+        msg: 'Não foi possível encontrar um usuário com o email inserido'
+      };
+    }
+
+    const check = await compare(password, user.password);
+
+    if (!check) {
+      return {
+        logged: false,
+        msg: 'Senha inválida'
+      };
+    }
+
+    const token = tokenOptions.generateToken({ email: user.email }, '5h');
+
+    if (user.state !== 'A') {
+      const link = `${process.env.USER_ACTIVATION_URL}${token}`;
+
+      await mailProvider(
+        email,
+        "Ativação de Conta",
+        `<h1>Olá ${user.name}!</h1> <h3>Seu código de ativação é: <br><br> ${user.activation_code}</h3> <p>Link para realizar a ativação:</p> <br> <a><strong>${link}</strong></a>`
+      );
+    }
+
+    user.password = undefined;
+
+    return {
+      logged: true,
+      user,
+      jwt: token
+    }
+
+  } catch (err) {
+    throw new Error(err.message)
+  }
+}
