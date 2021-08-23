@@ -57,8 +57,7 @@ exports.activationAccount = async (token, code) => {
 
 exports.login = async (email, password) => {
   try {
-    const login = await usersRepository.findUserForLogin(email);
-    const user = login[0][0];
+    const [[user]] = await usersRepository.findUserForLogin(email);
 
     if (!user) {
       return {
