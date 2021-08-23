@@ -38,7 +38,7 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({ user: login.user, jwt: login.jwt });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(400).json(err.message);
   }
 }
