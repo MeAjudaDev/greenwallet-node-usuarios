@@ -31,3 +31,11 @@ exports.updateStateColumn = async (email, state) => {
 
   return await conn.query(sql, values);
 }
+
+exports.findUserForLogin = async (email) => {
+  const conn = await connect();
+  const sql = 'SELECT * FROM users WHERE email = ?'
+  const values = [email];
+
+  return await conn.query(sql, values);
+}
