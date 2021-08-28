@@ -2,12 +2,12 @@ const usersRepository = require("../repositories/UsersRepository");
 const tokenOptions = require("../utils/TokenOptions");
 const { encryptString } = require("./encryptionService");
 const { mailProvider } = require("../provider/sendMail/SendMailProvider");
-const { generateCodeFromLenght } = require("../utils/GenerateRandomCode");
+const { generateCodeFromLength } = require("../utils/GenerateRandomCode");
 
 exports.createUser = async (name, email, password) => {
   try {
     const encryptedPassword = await encryptString(password);
-    const activation_code = generateCodeFromLenght(4);
+    const activation_code = generateCodeFromLength(4);
 
     const userAlreadyExists = await usersRepository.findUserByEmail(email);
 

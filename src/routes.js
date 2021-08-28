@@ -10,5 +10,5 @@ routes.post(
   usersController.createUser
 );
 routes.post("/users/activation", usersController.activationAccount);
-routes.post("/users/recoverPassword");
+routes.post("/users/confirmationCode", usersController.sendUserCode);
 module.exports = routes;
