@@ -5,12 +5,12 @@ exports.mailProvider = async (email, subject, message) => {
     const testAccount = await nodemailer.createTestAccount();
 
     const transporter = nodemailer.createTransport({
-        host: process.env.MAILER_HOST,
+        host: `${process.env.MAILER_HOST}`,
         port: process.env.MAILER_PORT,
         secure: false,
         auth: {
-            user: process.env.MAILER_USER,
-            pass: process.env.MAILER_PASS
+            user: testAccount.user,
+            pass: testAccount.pass
         }
     });
 

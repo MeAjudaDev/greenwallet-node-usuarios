@@ -12,8 +12,7 @@ exports.createUser = async (name, email, password) => {
     const [userAlreadyExists] = await usersRepository.findUserByEmail(email);
 
     if (userAlreadyExists.length > 0) {
-      throw new Error("E-mail is already in use!");
-      return null;
+      throw new Error(`This e-mail (${email}) is already in use!`);
     }
 
     await usersRepository.create({
@@ -23,11 +22,19 @@ exports.createUser = async (name, email, password) => {
       activation_code
     });
 
+    const result = {
+      message: name,
+      body: {
+        name, email
+      }
+    }
+
     await sendMailService.activationAccountMail(name, email, activation_code);
 
+    return result
+
   } catch (err) {
-    console.error(err);
-    throw new Error(`This e-mail (${email}) is already in use!`);
+    throw new Error(err.message);
   }
 }
 
@@ -44,11 +51,11 @@ exports.activationAccount = async (token, code) => {
     if (code === user.activation_code) {
       return await usersRepository.updateStateColumn(email, 'A');
     } else {
-      throw new Error("Invalid code!")
+      throw new Error(`This code (${code}) is invalid!`)
     }
 
   } catch (err) {
-    throw new Error(`This code (${code}) is invalid!`);
+    throw new Error(err.message);
   }
 
 }
@@ -60,27 +67,25 @@ exports.userAuthentication = async (email, password) => {
     const passwordMatch = await encryptionService.compareString(password, user.password);
 
     if (!passwordMatch) {
-      throw new Error("Email or password incorrect!");
+      throw new Error("Email or password is incorrect!");
+    }
+
+    if (user.state != 'A') {
+      throw new Error("Pending account activation!");
     }
 
     const token = tokenOptions.generateToken({}, '1h');
 
-    const tokenReturn = {
-      token,
-      user: {
-        name: user.name,
-        email: user.email
-      }
+    const result = {
+      message: user.name,
+      body: { token }
     }
 
-    if (user.state != 'A') {
-      const tokenReturnMessage = { ...tokenReturn, message: 'Ative sua conta!' }
-      return tokenReturnMessage;
-    }
+    return result;
 
-    return tokenReturn;
-
-  } catch (error) {
-    throw new Error("Email or password incorrect!");
+  } catch (err) {
+    throw new Error(err.message);
   }
 }
+
+

@@ -4,8 +4,8 @@ exports.createUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    await usersServices.createUser(name, email, password);
-    return res.status(200).send();
+    const user = await usersServices.createUser(name, email, password);
+    return res.status(200).json(user);
 
   } catch (err) {
     console.error(err);
@@ -32,12 +32,11 @@ exports.userAuthentication = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const tokenReturn = await usersServices.userAuthentication(email, password);
+    const auth = await usersServices.userAuthentication(email, password);
 
-    return res.status(200).json(tokenReturn);
+    return res.status(200).json(auth);
 
   } catch (err) {
-    console.log(err);
-    return res.status(400).json({ message: err.message });
+    return res.status(205).json({ message: err.message });
   }
 }

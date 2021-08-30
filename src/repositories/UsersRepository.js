@@ -15,7 +15,7 @@ exports.create = async ({ name, email, password, activation_code }) => {
 
 exports.findUserByEmail = async (email) => {
   const conn = await connect();
-  const sql = 'SELECT name, email, activation_code, password, state FROM users WHERE email = ?';
+  const sql = 'SELECT id, name, email, activation_code, password, state FROM users WHERE email = ?';
   const values = [email];
 
   return await conn.query(sql, values);
