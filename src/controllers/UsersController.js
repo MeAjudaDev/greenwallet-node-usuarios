@@ -15,10 +15,9 @@ exports.createUser = async (req, res) => {
 
 exports.activationAccount = async (req, res) => {
   try {
-    const { token } = req.query;
-    const { code } = req.body;
+    const { code, email } = req.body;
 
-    await createUsersService.activationAccount(token, code);
+    await createUsersService.activationAccount(email, code);
 
     return res.status(200).json("Account activated!");
   } catch (err) {
