@@ -2,17 +2,17 @@ const usersRepository = require("../repositories/UsersRepository");
 const tokenOptions = require("../utils/TokenOptions");
 const { encryptString, compare } = require("./encryptionService");
 const { mailProvider } = require("../provider/sendMail/SendMailProvider");
-const { generateCodeFromLenght } = require("../utils/GenerateRandomCode");
+const { generateCodeFromLength } = require("../utils/GenerateRandomCode");
 
 exports.createUser = async (name, email, password) => {
   try {
     const encryptedPassword = await encryptString(password);
-    const activation_code = generateCodeFromLenght(4);
+    const activation_code = generateCodeFromLength(4);
 
-    const userAlreadyExists = await usersRepository.findUserByEmail(email);
+    const [userAlreadyExists] = await usersRepository.findUserByEmail(email);
 
-    if (userAlreadyExists[0].length > 0) {
-      throw new Error("E-mail is already in use!");
+    if (userAlreadyExists.length > 0) {
+      throw new Error(`This e-mail (${email}) is already in use!`);
     }
 
     await usersRepository.create({
@@ -31,7 +31,7 @@ exports.createUser = async (name, email, password) => {
       `<h1>Olá ${name}!</h1> <h3>Seu código de ativação é: <br><br> ${activation_code}</h3> <p>Link para realizar a ativação:</p> <br> <a><strong>${link}</strong></a>`
     );
   } catch (err) {
-    throw new Error(`This e-mail (${email}) is already in use!`);
+    throw new Error(err.message);
   }
 };
 
@@ -43,15 +43,15 @@ exports.activationAccount = async (token, code) => {
 
     const email = tokenInfo.email;
 
-    const user = await usersRepository.findUserByEmail(email);
+    const [[user]] = await usersRepository.findUserByEmail(email);
 
-    if (code === user[0][0].activation_code) {
-      return await usersRepository.updateStateColumn(email, "A");
+    if (code === user.activation_code) {
+      return await usersRepository.updateStateColumn(email, 'A');
     } else {
-      throw new Error("Invalid code!");
+      throw new Error(`This code (${code}) is invalid!`)
     }
   } catch (err) {
-    throw new Error(`This code (${code}) is invalid!`);
+    throw new Error(err.message);
   }
 };
 
